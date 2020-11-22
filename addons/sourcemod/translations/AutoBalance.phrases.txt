@@ -1,0 +1,842 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//																						  		  //
+//										ИНФОРМАЦИЯ:										  		  //
+//	*Данный плагин использует библиотеку "colorvariables", всю нужную информацию о ней вы можете  //
+//	 найти на страничке разработчика: https://forums.alliedmods.net/showthread.php?t=267743.	  //
+//																						  		  //
+//  *Цвета, которые вы можете использовать:          											  //
+//																								  //
+//  1. {default}  - обычный.			9.  {orchid} 	 - светло-лиловый.						  //
+//	2. {red}      - красный.			10. {yellow} 	 - желтый.								  //
+//	3. {lightred} - светло-красный.		11. {gold}   	 - золотой.								  //
+//	4. {darkred}  - темно-красный.		12. {lightgreen} - светло-зеленый.						  //
+//	5. {bluegrey} - серо-голубой.		13. {green}		 - зеленый.								  //
+//	6. {blue}     - голубой.			14. {lime}		 - салатовый.							  //
+//	7. {darkblue} - синий.				15. {grey}		 - серый 1.								  //
+//	8. {purple}	  - фиолетовый.			16. {grey2}		 - серый 2 xD.							  //
+//																								  //
+//	*Визуальное представление данных цветов можно посмотреть в каталоге master.				      //
+//																								  //
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+"Phrases"
+{
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//																						  		  //
+//												МЕНЮ										  	  //	
+//																						  		  //
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	"Team_Balance_Menu"
+	{
+		"ru"	"Сбалансировать команды"
+	}
+	
+	"Title_Swap_Menu"
+	{
+		"ru"	"Перевести игрока"
+	}
+	
+	"Title_Admin_Menu"
+	{
+		"ru"	"Админ баланс-меню"
+	}
+	
+	"Title_Balance_Menu"
+	{
+		"ru"	"Баланс-меню сервера"
+	}
+	
+	"Title_Filters_Menu"
+	{
+		"ru"	"Управление фильтрами"
+	}
+	
+	"Change_Request"
+	{
+		"ru"	"Предложить игроку поменяться командами"
+	}
+	
+	"Vote_Balance"
+	{
+		"ru"	"Проголосовать за баланс"
+	}
+	
+	"Title_Change_Request"
+	{
+		"ru"	"Выберите игрока:"
+	}
+	
+	"Title_Request_Menu"
+	{
+		"ru"	"Игрок %s предлагает поменяться с вами командой"
+	}
+	
+	"Accept"
+	{
+		"ru"	"Принять"
+	}
+	
+	"Refuse"
+	{
+		"ru"	"Отказаться"
+	}
+	
+	"Evenly_Balance"
+	{
+		"ru"	"Равномерно"
+	}
+	
+	"Unevenly_Balance"
+	{
+		"ru"	"Неравномерно"
+	}
+	
+		"Title_When_Menu"
+	{
+		"ru"	"Когда?"
+	}
+	
+	"Immediately"
+	{
+		"ru"	"Немедленно" 
+	}
+	
+	"Round_The_End"
+	{
+		"ru"	"В конце раунда"
+	}
+	
+	"CT"
+	{
+		"ru"	"КТ"
+	}
+	
+	"T"
+	{
+		"ru"	"Т"
+	}
+	
+	"SPEC"
+	{
+		"ru"	"Наблюдатель"
+	}
+	
+	"Title_Which_Menu"
+	{
+		"ru"	"В какую команду перевести игрока?"
+	}
+	
+	"Title_Restart_Round"
+	{
+		"ru"	"Рестарт раунда"
+	}
+	
+	"Respwan_Player"
+	{
+		"ru"	"Выберите игрока для возрождения:"
+	}
+	
+	"Title_Restart_Match"
+	{
+		"ru"	"Рестарт матча"
+	}
+	
+	"Title_Respwan_Player"
+	{
+		"ru"	"Возродить игрока"
+	}
+	
+	"Queue_Ct"
+	{
+		"ru"	"Занять очередь за КТ"
+	}
+	
+	"Quit_Ct"
+	{
+		"ru"	"Выйти из очереди за КТ"
+	}
+	
+	"Queue_T"
+	{
+		"ru"	"Занять очередь за Т"
+	}
+	
+	"Queue_T_1"
+	{
+		"ru"	"В очереди Т: %i"
+	}
+	
+	"Queue_CT_1"
+	{
+		"ru"	"В очереди КТ: %i"
+	}
+	
+	"Queue_T_2"
+	{
+		"ru"	"Очередь Т"
+	}
+	
+	"Queue_CT_2"
+	{
+		"ru"	"Очередь КТ"
+	}
+	
+	"Quit_T"
+	{
+		"ru"	"Выйти из очереди за Т"
+	}
+	
+	"Title_Queue_Management"
+	{
+		"ru"	"Управление очередями"
+	}
+	
+	"Kick_Out_Of_Queue"
+	{
+		"ru"	"Выгнать игрока из очереди"
+	}
+	
+	"Move_From_Queue"
+	{
+		"ru"	"Переместить игрока из одной очереди в другую"
+	}
+	
+	"Shift_In_Queue"
+	{
+		"ru"	"Сдвинуть место игрока в очереди"
+	}
+	
+	"Erase_Queue"
+	{
+		"ru"	"Очистить очередь"
+	}
+	
+	"Create_New_Queue"
+	{
+		"ru"	"Создать новую очередь"
+	}
+	
+	"Ban_Queue"
+	{
+		"ru"	"Запретить игроку вставать в очередь"
+	}
+	
+	"View_Queue"
+	{
+		"ru"	"Просмотреть игроков в очередях"
+	}
+	
+	"Select_Player"
+	{
+		"ru"	"Выберите игрока:"
+	}
+	
+	"Select_Player_Of_Queue_CT"
+	{
+		"ru"	"Выберите игрока из очереди КТ:"
+	}
+	
+	"Select_Player_Of_Queue_T"
+	{
+		"ru"	"Выберите игрока из очереди Т:"
+	}
+	
+	"Title_Select_Queue"
+	{
+		"ru"	"Выберите очередь:"
+	}
+	
+	"Title_Select_What_Queue"
+	{
+		"ru"	"Выберите очередь в которую перенести игрока:"
+	}
+	
+	"Title_Select_Queue_Want_To_Clear"
+	{
+		"ru"	"Выберите очередь, которую хотите очистить:"
+	}
+	
+	"Reselect_Player_Of_Queue"
+	{
+		"ru"	"Выберите игрока с которым должен поменяться %s:"
+	}
+	
+	"Title_Create_Queue"
+	{
+		"ru"	"Выберите команду, в которую создать очередь:"
+	}
+	
+	"Note_1"
+	{
+		"ru"	"* Создав новую очередь, вы автоматически очистите предыдущую *"
+	}
+	
+	"Title_Select_Players_For_Create_Queue"
+	{
+		"ru"	"Выберите игроков для создания очереди за"
+	}
+	
+	"Create_Queue"
+	{
+		"ru"	"Создать очередь из (%i) игроков"
+	}
+	
+	"Select_Queue"
+	{
+		"ru"	"Выберите очередь, которую запретить игроку:"
+	}
+	
+	"Title_View_Queue"
+	{
+		"ru"	"В очереди %t - %i игроков:"
+	}
+	
+	"Title_Immunity_Menu"
+	{
+		"ru"	"Выдать игроку иммунитет"
+	}
+	
+	"Title_Immunity"
+	{
+		"ru"	"Выберите игрока для выдачи иммунитета:"
+	}
+	
+	"Title_Ban_Management_Menu"
+	{
+		"ru"	"Управление блокировками команд"
+	}
+	
+	"Select_Team"
+	{
+		"ru"	"Выберите команду:"
+	}
+	
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//																						  		  //
+//											   ФИЛЬТРЫ										  	  //	
+//																						  		  //
+////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	"Filter_KD"
+	{
+		"ru"	"КД (убийства : смерти)"
+	}
+	
+	"Filter_MVP"
+	{
+		"ru"	"Ценность игрока (MVP)"
+	}
+	
+	"Filter_Time"
+	{
+		"ru"	"Время нахождение на сервере"
+	}
+	
+	"Filter_TimeTeam"
+	{
+		"ru"	"Время нахождение в команде"
+	}
+	
+	"Filter_Money"
+	{
+		"ru"	"Количество $"
+	}
+	
+	"Filter_Ping"
+	{
+		"ru"	"Пинг"
+	}
+	
+	"Filter_Admin"
+	{
+		"ru"	"Админ"
+	}
+	
+	"Filter_Headshot"
+	{
+		"ru"	"Вероятность попадения в голову"
+	}
+	
+	"Title_On_Balance"
+	{
+		"ru"	"Запустить авто-баланс"
+	}
+	
+	"Title_Off_Balance"
+	{
+		"ru"	"Выключить авто-баланс"
+	}
+	
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//																						  		  //
+//									    ЧАТ (ПРИВАТНЫЙ)										  	  //	
+//																						  	 	  //
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	"Doesnt_Allow_Balance"
+	{
+		"ru"	"{darkred}Баланс не позволяет сменить команду{default}"
+	}
+	
+	"Player_Left_Server"
+	{
+		"ru"	"{darkred}Игрок с которым вы хотели поменяться - покинул сервер{default}"
+	}
+	
+	"Player_Left_Server_1"
+	{
+		"ru"	"{darkred}Игрок покинул сервер{default}"
+	}
+	
+	"Player_Left_Server_2"
+	{
+		"ru"	"{darkred}Игрок {grey}%s{darkred} покинул сервер{default}"
+	}
+	
+	"Left_Queue"
+	{
+		"ru"	"{darkred}Игрок {grey}%s{darkred} поикнул очередь{default}"
+	}
+	
+	"Not_Been_Swap"
+	{
+		"ru"	"{darkred}Вас не перевели в другую команду, чтобы не портить баланс{default}"
+	}
+	
+	"Player_Changed_Team"
+	{
+		"ru"	"{darkred}Игрок с которым вы хотели поменяться, сменил команду - смена команд отменена{default}"
+	}
+	
+	"You_Changed_Team"
+	{
+		"ru"	"{darkred}Вы сменили команду и теперь не сможете поменяться с игроком{default}"
+	}
+	
+	"Request_Has_Already"
+	{
+		"ru"	"{darkred}Вы уже формировали запрос, следующий сможете сформировать спустя {yellow}15{darkred} секунд{default}"
+	}
+	
+	"Already_Accepted"
+	{
+		"ru"	"{grey}%s {darkred}уже принял ваш запрос, ждите окончание раунда{default}"
+	}
+	
+	"No_Players"
+	{
+		"ru"	"{darkred}Нет игроков с которыми вы могли поменяться командами{default}"
+	}
+	
+	"Sent_A_Request"
+	{
+		"ru"	"{green}Вы отправили запрос на смену команд игроку{default}"
+	}
+	
+	"Accepted_Request"
+	{
+		"ru"	"{grey}%s {green}принял ваше предложение. Вы поменяетесь командами в конце текущего раунда{default}"
+	}
+	
+	"Dont_Accept_Your_Request"
+	{
+		"ru"	"{grey}%s{darkred} не принял ваше предложение{default}"
+	}
+	
+	"You_Accepted_Refuse"
+	{
+		"ru"	"{green}Вы приняли предложение {grey}%s{green}, в конце текущего раунда вы смените команды{default}"
+	}
+	
+	"You_Refused"
+	{
+		"ru"	"{darkred}Вы отказались от предложения {grey}%s{default}"
+	}
+	
+	"Player_Disconnected"
+	{
+		"ru"	"{darkred}Игрок с которым вы хотели поменяться покинул сервер, вы не будете перемещены{default}"
+	}
+	
+	"Player_Timeout"
+	{
+		"ru"	"{darkred}Игрок с которым вы хотели поменяться не ответил на ваш запрос, вы не будете перемещены{default}"
+	}
+	
+	"Already_Voted"
+	{
+		"ru"	"{darkred}Вы уже голосовали! Осталось {yellow}%i{darkred} голос(a){default}"
+	}
+	
+	"Already_Voted_2"
+	{
+		"ru"	"{darkred}Вы уже голосовали!{default}"
+	}
+	
+	"Minimum_Players"
+	{
+		"ru"	"{darkred}На сервере должно быть больше {yellow}%i{darkred} игроков в обоих командах, для того, чтобы ваш голос учли!{default}"
+	}
+	
+	"Successfully_Swap"
+	{
+		"ru"	"{green}Вы успешно перевели игрока в другую команду{default}"
+	}
+	
+	"Not_Successfully_Swap"
+	{
+		"ru"	"{darkred}Вы не можете перевести игрока в данную команду, т.к. это нарушает баланс!{default}"
+	}
+	
+	"Flag_Set_Balance"
+	{
+		"ru"	"{darkred}Флаг о перемещение в другую команду был установлен, внимание, если баланс не будет позволять, игрок не будет переведен!{default}"
+	}
+	
+	"Balance_Team"
+	{
+		"ru"	"{green}Если баланс позволит, вы будете переведены за команду {grey}%t{green} в конце раунда{default}"
+	}
+	
+	"Balance_Team_Round_End"
+	{
+		"ru"	"{green}Вы будете переведены за команду {grey}%t{green} в конце раунда{default}"
+	}
+	
+	"Successfully_Changed_Team"
+	{
+		"ru"	"{green}Вы упешно поменялись командами!{default}"
+	}
+	
+	"Same_Team"
+	{
+		"ru"	"{darkred}Вы находитесь в одной команде с игроком, которым хотели поменяться командами{default}"
+	}
+	
+	"Your_Team"
+	{
+		"ru"	"{darkred}Вы уже состоите в данной команде{default}"
+	}
+	
+	"You_Took_Queue"
+	{
+		"ru"	"{green}Вы заняли место в очереди - {lime}%i{default}"
+	}
+	
+	"Already_In_Queue"
+	{
+		"ru"	"{darkred}Вы уже занимали очередь, ваше место в ней - {lime}%i{default}"
+	}
+	
+	"Already_In_Queue_1"
+	{
+		"ru"	"{darkred}Вы уже стоите в очереди в другую команду{default}"
+	}
+	
+	"Out_Of_Queue"
+	{
+		"ru"	"{green}Вы вышли из очереди{default}"
+	}
+	
+	"No_Longer_In_Queue"
+	{
+		"ru"	"{darkred}Вас уже нет в очереди{default}"
+	}
+	
+	"Wait_For_Swap"
+	{
+		"ru"	"{green}Ваша очередь настала, в конце раунда вы будете переведены за другую команду{default}"
+	}
+	
+	"Place_In_The_Team_Pre"
+	{
+		"ru"	"{green}В команде освободилось место, вас перенесут в новую команду в конце раунда{default}"
+	}
+	
+	"Place_In_The_Team"
+	{
+		"ru"	"{green}Вы были перенесены в новую команды, так как стояли в очереди{default}"
+	}
+	
+	"Queue_Of_N_People"
+	{
+		"ru"	"{darkred}В данную команду стоит очередь из {yellow}%i{darkred} игроков{default}"
+	}
+	
+	"On_Balance"
+	{
+		"ru"	"{green}Вы запустили авто-баланс на сервере, он будет работать пока вы его не выключите{default}"
+	}
+	
+	"Off_Balance"
+	{
+		"ru"	"{green}Вы {red}выключили{green} авто-баланс на сервере{default}"
+	}
+	
+	"List_Dead_Players_Is_Empty"
+	{
+		"ru"	"{darkred}Нет мертвых игроков{default}"
+	}
+	
+	"Player_Spawned"
+	{
+		"ru"	"{green}Игрок {grey}%s{green} - успешно возрожден{default}"
+	}
+	
+	"Queue_Is_Empty"
+	{
+		"ru"	"{darkred}Данная очередь пустая{default}"
+	}
+	
+	"Player_Is_Not_Queue"
+	{
+		"ru"	"{darkred}Игрока нет в очереди{default}"
+	}
+	
+	"Player_Is_Not_Queue_1"
+	{
+		"ru"	"{darkred}Игрока {grey}%s{darkred} нет в очереди{default}"
+	}
+	
+	"Player_Removed_From_Queue"
+	{
+		"ru"	"{green}Игрок успешно был удален из очереди{default}"
+	}
+	
+	"Kick_From_Queue"
+	{
+		"ru"	"{darkred}Администартор {grey}%s{darkred} выгнал вас из очереди за {gold}%t{default}"
+	}
+	
+	"Only_One_Queue"
+	{
+		"ru"	"{darkred}Существует только одна очередь{default}"
+	}
+	
+	"Player_Is_Moved"
+	{
+		"ru"	"{green}Игрок успешно перемещен в другую очередь{default}"
+	}
+	
+	"Moved_Another_Queue"
+	{
+		"ru"	"{darkred}Администартор {grey}%s{darkred} перевел вас в очередь за {gold}%t{default}"
+	}
+	
+	"Already_In_This_Team"
+	{
+		"ru"	"{darkred}Игрок уже находится в данной команде{default}"
+	}
+
+	"Already_In_The_Queue"
+	{
+		"ru"	"{darkred}Игрок уже находится в данной очереди{default}"
+	}
+	
+	"Only_One_Player_In_Queue"
+	{
+		"ru"	"{darkred}В очереди находится только один игрок, вы не сможете изменить его расположение в ней{default}"
+	}
+	
+	"Player_Not_Swap_Place_With_Himself"
+	{
+		"ru"	"{darkred}Вы не можете поменять игрока с самим с собой{default}"
+	}
+	
+	"Swapped_Two_Players"
+	{
+		"ru"	"{green}Вы успешно поменяли местами двух игроков{default}"
+	}
+	
+	"You_Were_Swapped"
+	{
+		"ru"	"{darkred}Администратор {grey}%s{darkred} сменил ваше место в очереди с {grey}%s{darkred} - теперь вы занимаете {green}%i{darkred} место{default}"
+	}
+	
+	"Queue_Cleared"
+	{
+		"ru"	"{green}Очередь была успешно очищена{default}"
+	}
+	
+	"Your_Queue_Cleared"
+	{
+		"ru"	"{darkred}Администартор {grey}%s{darkred} очистил вашу очередь, теперь вас нет в ней{default}"
+	}
+	
+	"Delete_Of_New_Queue"
+	{
+		"ru"	"{darkred}Администартор {grey}%s{darkred} создал новую очередь, вы были удалены, т.к. находились в старой{default}"
+	}
+	
+	"Added_In_New_Queue"
+	{
+		"ru"	"{green}Администартор {grey}%s{green} добавил вас в новую очередь{default}"
+	}
+	
+	"Created_New_Queue"
+	{
+		"ru"	"{green}Вы успешно создали новую очередь{default}"
+	}
+	
+	"You_Loked_Queue"
+	{
+		"ru"	"{darkred}Администартор {grey}%s{darkred} запретил вам очередь {gold}%t{default}"
+	}
+	
+	"You_Unloked_Queue"
+	{
+		"ru"	"{green}Администартор {grey}%s{green} разрешил вам очередь {gold}%t{default}"
+	}
+	
+	"Banned_Queue"
+	{
+		"ru"	"{green}Вы успешно заблокировали очередь игроку{default}"
+	}
+	
+	"Unbanned_Queue"
+	{
+		"ru"	"{green}Вы успешно разрешили очередь игроку{default}"
+	}
+	
+	"Admin_Banned_Queue"
+	{
+		"ru"	"{darkred}Администратор запретил вам вставать в очередь за {gold}%t{default}"
+	}
+	
+	"Queue_Is_Blocked"
+	{
+		"ru"	"{darkred}У игрока {grey}%s{darkred} заблокирована очередь{default}"
+	}
+	
+	"Immunity_Issued"
+	{
+		"ru"	"{green}Вы успешно выдали иммунитет игроку {grey}%s{default}"
+	}
+	
+	"Immunity_Removed"
+	{
+		"ru"	"{green}Вы успешно сняли иммунитет у игрока {grey}%s{default}"
+	}
+	
+	"Admin_Issued_Immunity"
+	{
+		"ru"	"{green}Администратор {grey}%s{green} выдал вам иммунитет{default}"
+	}
+	
+	"Admin_Removed_Immunity"
+	{
+		"ru"	"{darkred}Администратор {grey}%s{darkred} забрал у вас иммунитет{default}"
+	}
+	
+	"Player_Immunity"
+	{
+		"ru"	"{darkred}Данный игрок обладает иммунитетом, вы не можете его перевести{default}"
+	}
+	
+	"Function_Prohibited"
+	{
+		"ru"	"{darkred}Данная функция запрещена{default}"
+	}
+	
+	"Player_Dont_Change_Team"
+	{
+		"ru"	"{green}Вы сняли флаг перемещения с игрока {grey}%s{default}"
+	}
+	
+	"Admin_Remove_Change_Team"
+	{
+		"ru"	"{darkred}Администратор {grey}%s{darkred} снял с вас флаг перемещения"
+	}
+	
+	"Bot_On_The_Server"
+	{
+		"ru"	"{darkred}Вы не можеет воспользоваться данной функцие, т.к. на сервере присутсвует бот{default}"
+	}
+	
+	"Unban_Team"
+	{
+		"ru"	"{green}Вы успешно разрешили игроку {grey}%s{green} команду {gold}%t{default}"
+	}
+	
+	"Admin_Unban_Team"
+	{
+		"ru"	"{green}Администратор {grey}%s{green} разрешил вам команду {gold}%t{default}"
+	}
+	
+	"Ban_Team"
+	{
+		"ru"	"{green}Вы успешно запретили игроку {grey}%s{green} команду {gold}%t{default}"
+	}
+	
+	"Admin_Ban_Team"
+	{
+		"ru"	"{darkred}Администратор {grey}%s{darkred} запретил вам команду {gold}%t{default}"
+	}
+	
+	"Team_Banned"
+	{
+		"ru"	"{darkred}Комманда {gold}%t{darkred} запрещена для вас{default}"
+	}
+	
+	"Team_Banned_Player"
+	{
+		"ru"	"{darkred}Комманда {gold}%t{darkred} запрещена для данного игрока{default}"
+	}
+	
+	"Team_Banned_You_Not_Change_1"
+	{
+		"ru"	"{darkred}Вы не можете поменять командами с {grey}%s{darkred}, т.к. у него заблокирована ваша команда"
+	}
+	
+	"Team_Banned_You_Not_Change_2"
+	{
+		"ru"	"{darkred}Вы не можете поменять командами с {grey}%s{darkred}, т.к. у вас заблокирована его команда"
+	}
+	
+	"Not_Team_Change"
+	{
+		"ru"	"{darkred}Мы не можем перенести вас за команду из-за баланса, вы остаетесь в {gold}зрителях{default}"
+	}
+	
+	"Ban_Change_Team"
+	{
+		"ru"	"{darkred}Вам запретили команду в которой вы находитесь, вы были перенесены в доступную команду {gold}%t{default}"
+	}
+	
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//																						  		  //
+//									       ЧАТ (ОБЩИЙ)										  	  //	
+//																						  	 	  //
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	"Voted"
+	{
+		"ru"	"{blue}Игрок {grey}%s{blue} проголосовал за баланс команд ({yellow}%i{blue} / {yellow}%i{blue})"
+	}
+	
+	"Balance_Successfully"
+	{
+		"ru"	"{gold}Баланс команд прошел успешно!{default}"
+	}
+	
+	"Balance_Wiil_Round_End"
+	{
+		"ru"	"{blue}Баланс произойдет в конце раунда!{default}"
+	}
+	
+	"Teams_Were_Balanced"
+	{
+		"ru"	"{gold}Команды были сбалансированы!{default}"
+	}
+	
+	"Admin_Called_Restart_Round"
+	{
+		"ru"	"{gold}Администартор {grey}%s{gold} запустил рестарт текущего раунда{default}"
+	}
+	
+	"Admin_Called_Restart_Match"
+	{
+		"ru"	"{gold}Администартор {grey}%s{gold} запустил рестарт текущей игры{default}"
+	}
+}
