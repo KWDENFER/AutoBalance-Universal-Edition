@@ -40,14 +40,14 @@
 
 // Defines Admin Menu Buttons  
 #define ADMIN_MENU 				1	// разрешить ли в основной админ-панели SourceMod вкладку с админ-меню AutoBalance
-#define ADMIN_FILTERS 			1
-#define ADMIN_BALANCE 			1
+#define ADMIN_FILTERS 				1
+#define ADMIN_BALANCE 				1
 #define ADMIN_SWAP 	  			1
-#define ADMIN_RESTART_ROUND 	1
-#define ADMIN_RESTART_MATCH		1
-#define ADMIN_RESPAWN			1	
+#define ADMIN_RESTART_ROUND 			1
+#define ADMIN_RESTART_MATCH			1
+#define ADMIN_RESPAWN				1	
 #define ADMIN_QUEUE				1		
-#define ADMIN_IMMUNITY			1	
+#define ADMIN_IMMUNITY				1	
 #define ADMIN_BAN				1	
 
 // pragma 
@@ -200,7 +200,7 @@ public void OnPluginStart()
 	gc_iCheckIntervalRoundStart = AutoExecConfig_CreateConVar("sm_ab_interval_rs", "5", "В течение скольки секунд после начала раунда балансирвоать команды? (учтите, что не стоит устанавливать слишком большое значение)", 0, true, 1.0, false);
 	gc_iAutoBalanceOptions  = AutoExecConfig_CreateConVar("sm_ab_options", "0", "Запретить переносить игроков из команды? (0 - выключает данную опцию, 1 - запретить перемещать игроков из команды КТ, 2 - запретить перемещать игроков из команды Т)", 0, true, 0.0, true, 2.0);
 	gc_bSwapAlivePlayer = AutoExecConfig_CreateConVar("sm_ab_swap_alive", "1", "Разрешить переносить живых игроков во время баланса команд? (игрок автоматически сменит команду и перенесется на спавн новой команды)(0 - запретить, 1 - разрешить)", 0, true, 0.0, true, 1.0);
-	gc_bOnTakeDamageSwappedPlayers = AutoExecConfig_CreateConVar("sm_ab_on_take_damage", "1", "Разрешить перемещенным игрокам в конце раунда наносить/принимать урон? (0 - запретить, 1 - разрешить)", 0, true, 0.0, true, 1.0);
+	gc_bOnTakeDamageSwappedPlayers = AutoExecConfig_CreateConVar("sm_ab_on_take_damage", "1", "Разрешить перемещенным игрокам в конце раунда наносить/принимать урон? (0 - разрешить, 1 - запретить)", 0, true, 0.0, true, 1.0);
 	gc_iAutoConnected = AutoExecConfig_CreateConVar("sm_ab_auto_connected", "0", "После подключение игрока на сервер, автоматически присоединять его к команде (0 - оставить игрока в наблюдателях, 1 - присоединять к команде, которую выберет авто-баланс)", 0, true, 0.0, true, 1.0);
 	gc_bSpectatorMode = AutoExecConfig_CreateConVar("sm_ab_spectator_mode", "0", "Разрешить игрокам находится в команде зрителей? (0 - разрешить, 1 - запретить (через N(настраивается ниже) секунд игрок будет автоматически перемещен за команду по правилам баланса))", 0, true, 0.0, true, 1.0);
 	gc_flCheckSpectators = AutoExecConfig_CreateConVar("sm_ab_check_spectator", "5", "Время, через которое игрок будет перемещен с команды зрителей (указывать в секундах)", 0, true, 1.0, false);
