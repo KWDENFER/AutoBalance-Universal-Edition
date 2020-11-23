@@ -40,14 +40,14 @@
 
 // Defines Admin Menu Buttons  
 #define ADMIN_MENU 				1	// разрешить ли в основной админ-панели SourceMod вкладку с админ-меню AutoBalance
-#define ADMIN_FILTERS 				1
-#define ADMIN_BALANCE 				1
+#define ADMIN_FILTERS 			1
+#define ADMIN_BALANCE 			1
 #define ADMIN_SWAP 	  			1
-#define ADMIN_RESTART_ROUND 			1
-#define ADMIN_RESTART_MATCH			1
-#define ADMIN_RESPAWN				1	
+#define ADMIN_RESTART_ROUND 	1
+#define ADMIN_RESTART_MATCH		1
+#define ADMIN_RESPAWN			1	
 #define ADMIN_QUEUE				1		
-#define ADMIN_IMMUNITY				1	
+#define ADMIN_IMMUNITY			1	
 #define ADMIN_BAN				1	
 
 // pragma 
@@ -254,7 +254,8 @@ public void OnPluginStart()
 
 public Action Hook_OnTakeDamage(int victim, int& attacker, int& inflictor, float& damage, int& damagetype, int& weapon, float damageForce[3], float damagePosition[3])
 {	
-	if(IsValidClient(victim) && IsValidClient(inflictor) && IsClientInGame(victim) && IsClientInGame(inflictor) && (g_bSwapped[victim] && g_bSwapped[inflictor]) || (g_bSwapped[victim] && !g_bSwapped[inflictor]) || (!g_bSwapped[victim] && g_bSwapped[inflictor]))
+
+	if(IsValidClient(victim) && IsValidClient(inflictor) && IsClientInGame(victim) && IsClientInGame(inflictor) && ((g_bSwapped[victim] && g_bSwapped[inflictor]) || (g_bSwapped[victim] && !g_bSwapped[inflictor]) || (!g_bSwapped[victim] && g_bSwapped[inflictor])))
 	{
 		damage = 0.0;
 		return Plugin_Changed;
@@ -5147,12 +5148,17 @@ public void SetImmunity(int client, bool immunity)
 
 public bool IsValidClient(int client)
 {
-	if(1 <= client && client <= MaxClients)
+	if(client <= 0)
 	{
-		return true;
+		return false;
 	}
 	
-	return false;
+	if(client > MaxClients)
+	{
+		return false;
+	}
+	
+	return true;
 }
 
 public bool GetButton(int button)
