@@ -40,15 +40,15 @@
 
 // Defines Admin Menu Buttons  
 #define ADMIN_MENU 				1	// разрешить ли в основной админ-панели SourceMod вкладку с админ-меню AutoBalance
-#define ADMIN_FILTERS 			1
-#define ADMIN_BALANCE 			1
-#define ADMIN_SWAP 	  			1
-#define ADMIN_RESTART_ROUND 	1
-#define ADMIN_RESTART_MATCH		1
-#define ADMIN_RESPAWN			1	
-#define ADMIN_QUEUE				1		
-#define ADMIN_IMMUNITY			1	
-#define ADMIN_BAN				1	
+#define ADMIN_FILTERS 			1	// управление фильтрами
+#define ADMIN_BALANCE 			1	// баланс команд
+#define ADMIN_SWAP 	  			1	// перенос игроков из одной команды в другую
+#define ADMIN_RESTART_ROUND 	1	// рестарт раунда
+#define ADMIN_RESTART_MATCH		1	// рестарт матча
+#define ADMIN_RESPAWN			1	// возродить игроков
+#define ADMIN_QUEUE				1	// управление очередями
+#define ADMIN_IMMUNITY			1	// выдача иммунитета
+#define ADMIN_BAN				1	// блокировка команд
 
 // pragma 
 #pragma newdecls required
@@ -81,6 +81,8 @@ ConVar gc_bAdminQueueManagement;
 ConVar gc_iAutoBalanceSettings;
 ConVar gc_flPercentPlayersVote;
 ConVar gc_bAdminBanJoiningTeam;
+ConVar gc_iPreciseAutoBalanceCt;	
+ConVar gc_iPreciseAutoBalanceT;
 ConVar gc_iSwapFilterTimeTeam;
 ConVar gc_iAutoBalanceOptions;
 ConVar gc_sCustomCommandsMenu;
@@ -89,6 +91,7 @@ ConVar gc_bAdminBalanceCheck;
 ConVar gc_bAdminRestartRound;
 ConVar gc_bAdminRestartMatch;
 ConVar gc_bTeamChangeRequest;
+ConVar gc_iPreciseAutoBalnce;
 ConVar gc_bPersonalImmunity;
 ConVar gc_iAutoBalanceLevel;
 ConVar gc_bAdminBalanceTeam;
@@ -165,7 +168,10 @@ public Plugin myinfo = {
 };
 
 public void OnPluginStart()
-{
+{	
+	// Translation 
+	LoadTranslations("AutoBalance.phrases");
+	
 	#if ADMIN_MENU == 1
 	if (LibraryExists("adminmenu"))
 	{
@@ -177,9 +183,6 @@ public void OnPluginStart()
 		}
 	}
 	#endif
-	
-	// Translation 
-	LoadTranslations("AutoBalance.phrases");
 	
 	// AutoExecConfig
     AutoExecConfig_SetCreateDirectory(true);
@@ -194,7 +197,10 @@ public void OnPluginStart()
 	gc_sPrefix = AutoExecConfig_CreateConVar("sm_ab_prefix", "[{green}SM{default}]", "Префикс перед сообщениями плагина");
 	gc_iAutoBalanceMode = AutoExecConfig_CreateConVar("sm_ab_mode", "1", "0 - отменяет баланс в игре, 1 - балансировать КТ относительно Т, 2 - балансировать Т относительно КТ", 0, true, 0.0, true, 2.0);
 	gc_iAutoBalanceLevel = AutoExecConfig_CreateConVar("sm_ab_level", "1", "0 - обычный уровень балансирования команд (easy), 1 - средний уровень балансировани команд (medium), 2 - сложный уровень балансирования команд (hard)", 0, true, 0.0, true, 2.0);
-	gc_iRatio = AutoExecConfig_CreateConVar("sm_ab_ratio", "2", "Сколько игроков приходится на одного игрока? (смотря относительно какой команды вы будете балансировать, если КТ, то на 1 КТ - N Т и наоборот, там где N - ваше число)", 0, true, 1.0, false);
+	gc_iRatio = AutoExecConfig_CreateConVar("sm_ab_ratio", "2", "Сколько игроков приходится на одного игрока? (смотря относительно какой команды вы будете балансировать, если КТ, то на 1 КТ - N Т и наоборот, там где N - ваше число)", 0, true, 0.0, false);
+	gc_iPreciseAutoBalnce = AutoExecConfig_CreateConVar("sm_ab_precise", "0", "Разрешить балансировать до определенного соотношения игроков? (0 - запретить, 1 - разрешить)\nАвто-баланс будет балансировать команды так, чтобы образовалась соответсвующее соотношение игроков из одной комнады к другой, игроки которые будут переваливать через допустимый предел пропорции - отправляются в наблюдатели (N / N, там где N - значение переменной)(Тем самым вы можете настроить баланс для 2x2, 5x5, 10x10 игроков)(Работает исключительно при gc_iRatio = 0)", 0, true, 0.0, true, 1.0);
+	gc_iPreciseAutoBalanceT = AutoExecConfig_CreateConVar("sm_ab_precise_t", "5", "Максимальное число игроков в команде Т? (Если количество игроков в данной команде будет превышать данное значение - игроки будут перенесены в наблюдатели) (работает исключительно при gc_iPreciseAutoBalnce = 1)", 0, true, 1.0, false);
+	gc_iPreciseAutoBalanceCt= AutoExecConfig_CreateConVar("sm_ab_precise_ct", "5", "Максимальное число игроков в команде КТ? (Если количество игроков в данной команде будет превышать данное значение - игроки будут перенесены в наблюдатели) (работает исключительно при gc_iPreciseAutoBalnce = 1)", 0, true, 1.0, false);
 	gc_iAutoBalanceSettings = AutoExecConfig_CreateConVar("sm_ab_settings", "3", "0 - постоянно балансировать в течение всей игры, 1 - балансировать в начале раунда, 2 - балансировать в конце раунда, 3 - балансировать в начале и в конце раунда, 4 - балансировать во время \"специальных\" событий, 5 - администартор сам выбирает, когда требуется включить и отключить авто-баланс", 0, true, 0.0, true, 5.0);
 	gc_flCheckInterval = AutoExecConfig_CreateConVar("sm_ab_interval", "0.5", "Промежуток времени, через который будет осуществляться проверка баланса", 0, true, 0.1, false);
 	gc_iCheckIntervalRoundStart = AutoExecConfig_CreateConVar("sm_ab_interval_rs", "5", "В течение скольки секунд после начала раунда балансирвоать команды? (учтите, что не стоит устанавливать слишком большое значение)", 0, true, 1.0, false);
@@ -297,11 +303,11 @@ public Action Hook_EndTouch(int client, int other)
 	{	
 		return Plugin_Stop;
 	}
-	if(0 < client <= MaxClients)
+	if(client <= 0 || client > MaxClients)
 	{
 		return Plugin_Stop;
 	}
-	if(0 < other <= MaxClients)
+	if(other <= 0 || other > MaxClients)
 	{
 		return Plugin_Stop;
 	}
@@ -313,6 +319,25 @@ public Action Hook_EndTouch(int client, int other)
 	}
 	
 	return Plugin_Changed;
+}
+
+public void OnGameFrame()
+{
+	if(gc_iQueue.BoolValue)
+	{
+		if(GameRules_GetProp("m_bWarmupPeriod"))
+		{
+			if(g_hQueueCt != null && g_hQueueCt.Length != 0 && CheckBalance(g_hQueueCt.Get(0), GetTeamClientCount(CS_TEAM_T), GetTeamClientCount(CS_TEAM_CT), CS_TEAM_CT))
+			{
+				MyChangeClientTeam(g_hQueueCt.Get(0), CS_TEAM_CT);
+			}
+			
+			if(g_hQueueT != null && g_hQueueT.Length != 0 && CheckBalance(g_hQueueT.Get(0), GetTeamClientCount(CS_TEAM_T), GetTeamClientCount(CS_TEAM_CT), CS_TEAM_T))
+			{
+				MyChangeClientTeam(g_hQueueT.Get(0), CS_TEAM_T);
+			}
+		}
+	}
 }
 
 #if ADMIN_MENU == 1
@@ -748,7 +773,7 @@ public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 					else
 					{
 						if(gc_bPluginMessages.BoolValue) CPrintToChat(g_hQueueT.Get(0), "%s %t", g_sPrefix, "Place_In_The_Team");
-						MyChangeClientTeam(g_hQueueT.Get(0), CS_TEAM_CT);
+						MyChangeClientTeam(g_hQueueT.Get(0), CS_TEAM_T);
 					}
 				}
 				else
@@ -890,7 +915,7 @@ public void Event_RoundEnd(Event event, const char[] name, bool dontBroadcast)
 					else
 					{
 						if(gc_bPluginMessages.BoolValue) CPrintToChat(g_hQueueT.Get(0), "%s %t", g_sPrefix, "Place_In_The_Team");
-						MyChangeClientTeam(g_hQueueT.Get(0), CS_TEAM_CT);
+						MyChangeClientTeam(g_hQueueT.Get(0), CS_TEAM_T);
 					}
 				}
 				else
@@ -1416,6 +1441,7 @@ public Action Menu_ChangeRequest(int client, int argc)
 	}
 	
 	menu.ExitButton = true;
+	menu.ExitBackButton = true;
     menu.Display(client, MENU_TIME_FOREVER);
 }
 
@@ -1446,6 +1472,13 @@ public int HandlerMenu_ChangeRequest(Menu menu, MenuAction action, int param1, i
 			else
 			{
 				CPrintToChat(param1, "%s %t", g_sPrefix, "Player_Left_Server_1");
+			}
+		}
+		case MenuAction_Cancel:
+		{
+			if(param2 == MenuCancel_ExitBack)
+			{
+				Menu_Balance(param1, 0);
 			}
 		}
 		case MenuAction_End:
@@ -1526,6 +1559,7 @@ public int HandlerMenu_Request(Menu menu, MenuAction action, int param1, int par
 			if(StrEqual(info, "accept"))
 			{
 				g_bSwapTeamPair[param1][g_iSwapTeamBuffer[param1]] = true; // g_iSwapTeamBuffer - хранит индекс клиента, который отправил запрос, при этом индекс ячейки массива = индексу игрока, который принял запрос.
+				g_bSwapTeamPair[g_iSwapTeamBuffer[param1]][param1] = true;
 				
 				g_bSwapTeamFlag[param1][g_iSwapTeamBuffer[param1]] = true;
 				g_bSwapTeamFlag[g_iSwapTeamBuffer[param1]][param1] = true;
@@ -1539,6 +1573,7 @@ public int HandlerMenu_Request(Menu menu, MenuAction action, int param1, int par
 			else if(StrEqual(info, "refuse"))
 			{
 				g_bSwapTeamPair[param1][g_iSwapTeamBuffer[param1]] = false;
+				g_bSwapTeamPair[g_iSwapTeamBuffer[param1]][param1] = false;
 				
 				g_bSwapTeamFlag[param1][g_iSwapTeamBuffer[param1]] = false;
 				g_bSwapTeamFlag[g_iSwapTeamBuffer[param1]][param1] = false;
@@ -4935,7 +4970,7 @@ public void RestartRound(int client) // * специальное событие 
 		GetClientName(client, name, sizeof(name));
 		
 		if(gc_bPluginMessages.BoolValue) CPrintToChatAll("%s %t", g_sPrefix, "Admin_Called_Restart_Round", name);
-		CS_TerminateRound(3.0, CSRoundEnd_Draw);
+		CS_TerminateRound(1.0, CSRoundEnd_Draw, true);
 		g_bSpecialEvent = true;
 	}
 	else
@@ -5133,7 +5168,7 @@ public bool IsPlayerImmunity(int client)
 	return false;
 }
 // ************************************************************************************************************************************
-//	- иммуните выдается при перемещение игрока из одной команды в другой во время баланса и действует в течение одного раунда, то есть
+//	- иммунитет выдается при перемещение игрока из одной команды в другой во время баланса и действует в течение одного раунда, то есть
 //	  если игрок был перемещен в начале раунда, то в конце он не будет перемещен обратно из-за баланса. 
 //	  НО нужно учитывать тот факт, что если игрок был перемещен в конце раунда, то баланс может перевести его и в начале.
 //	- иммунитет не выдается, если авто-баланс работает постоянно (sm_ab_settings = 0)
@@ -5195,6 +5230,7 @@ public void MyChangeClientTeam(int client, int team)
 	if(team == CS_TEAM_SPECTATOR)
 	{
 		ChangeClientTeam(client, team);
+		g_bSpectator[client] = false;
 	}
 	else
 	{
@@ -5220,306 +5256,214 @@ public bool CheckBalance(int client, int t, int ct, int team)
 		return true;
 	}
 	
-	if(GetClientTeam(client) == CS_TEAM_SPECTATOR || GetClientTeam(client) == CS_TEAM_NONE)
+	if(gc_iPreciseAutoBalnce.BoolValue && !gc_iRatio.BoolValue)
 	{
-		switch(gc_iAutoBalanceMode.IntValue)
+		if(GetClientTeam(client) == CS_TEAM_SPECTATOR || GetClientTeam(client) == CS_TEAM_NONE)
 		{
-			case 1: // команда КТ является основной 
+			if(team == CS_TEAM_CT)
 			{
-				switch(gc_iAutoBalanceLevel.IntValue)
+				if(GetTeamClientCount(CS_TEAM_CT) <= GetTeamClientCount(CS_TEAM_T) && gc_iPreciseAutoBalanceT.IntValue == gc_iPreciseAutoBalanceCt.IntValue && GetTeamClientCount(CS_TEAM_CT) < gc_iPreciseAutoBalanceCt.IntValue)
 				{
-				case EASY:
-				{
-					if(team == CS_TEAM_T)	
-					{
-						return true;
-					}
-					else if(RoundToMath(float(t) / float(ct + 1)) >= gc_iRatio.IntValue)
-					{
-						if(team == CS_TEAM_CT)
-						{
-							return true;
-						}
-					}
+					return true;
 				}
-				case MEDIUM:
+				else if(GetTeamClientCount(CS_TEAM_CT) < gc_iPreciseAutoBalanceCt.IntValue && GetTeamClientCount(CS_TEAM_T) >= gc_iPreciseAutoBalanceT.IntValue)
 				{
-					if(team == CS_TEAM_T)	
-					{
-						return true;
-					}
-					else if(RoundToMath(float(t) / float(ct + 1)) >= gc_iRatio.IntValue)
-					{
-						if(team == CS_TEAM_CT)
-						{
-							return true;
-						}
-					}
-				}
-				case HARD:
-				{
-					if(team == CS_TEAM_T)
-					{
-						if(float(t + 1) / float(ct) <= gc_iRatio.IntValue)
-						{
-							return true;
-						}
-						else if(float(t) / float(ct + 1) >=  gc_iRatio.IntValue)
-						{
-							return false;
-						}
-						else 
-						{
-							return true;
-						}
-					}
-					else if(team == CS_TEAM_CT)
-					{
-						if(float(t) / float(ct + 1) >= gc_iRatio.IntValue)
-						{
-							return true;
-						}
-					}
-				}
+					return true;
 				}
 			}
-			case 2: // команда Т является основной	
-			{		
-				switch(gc_iAutoBalanceLevel.IntValue)
+			
+			if(team == CS_TEAM_T)
+			{
+				if(GetTeamClientCount(CS_TEAM_T) <= GetTeamClientCount(CS_TEAM_CT) && GetTeamClientCount(CS_TEAM_T) < gc_iPreciseAutoBalanceT.IntValue)
 				{
-				case EASY:
-				{
-					if(team == CS_TEAM_CT)	
-					{
-						return true;
-					}
-					else if(RoundToMath(float(ct) / float(t + 1)) >= gc_iRatio.IntValue)
-					{
-						if(team == CS_TEAM_T)
-						{
-							return true;
-						}
-					}
+					return true;
 				}
-				case MEDIUM:
+				else if(GetTeamClientCount(CS_TEAM_T) < gc_iPreciseAutoBalanceT.IntValue && GetTeamClientCount(CS_TEAM_CT) >= gc_iPreciseAutoBalanceCt.IntValue)
 				{
-					if(team == CS_TEAM_CT)	
-					{
-						return true;
-					}
-					else if(RoundToMath(float(ct) / float(t + 1)) >= gc_iRatio.IntValue)
-					{
-						if(team == CS_TEAM_T)
-						{
-							return true;
-						}
-					}
+					return true;
 				}
-				case HARD:
+			}
+		}
+		else if(GetClientTeam(client) == CS_TEAM_CT)
+		{
+			if(team == CS_TEAM_T)
+			{
+				if((GetTeamClientCount(CS_TEAM_T) + 1 <= GetTeamClientCount(CS_TEAM_CT) - 1 || (abs(GetTeamClientCount(CS_TEAM_CT) - GetTeamClientCount(CS_TEAM_T)) == 1 && GetTeamClientCount(CS_TEAM_CT) > GetTeamClientCount(CS_TEAM_T)) && GetTeamClientCount(CS_TEAM_T) + 1 <= gc_iPreciseAutoBalanceT.IntValue))
 				{
-					if(team == CS_TEAM_CT)
-					{
-						if(float(ct + 1) / float(t) <= gc_iRatio.IntValue)
-						{
-							return true;
-						}
-						else if(float(ct) / float(t + 1) >=  gc_iRatio.IntValue)
-						{
-							return false;
-						}
-						else 
-						{
-							return true;
-						}
-					}
-					else if(team == CS_TEAM_T)
-					{
-						if(float(ct) / float(t + 1) >= gc_iRatio.IntValue)
-						{
-							return true;
-						}
-					}
+					return true;
 				}
+				else if(GetTeamClientCount(CS_TEAM_T) < gc_iPreciseAutoBalanceT.IntValue && GetTeamClientCount(CS_TEAM_CT) >= gc_iPreciseAutoBalanceCt.IntValue)
+				{
+					return true;
+				}
+			}
+		}
+		else if(GetClientTeam(client) == CS_TEAM_T)
+		{
+			if(team == CS_TEAM_CT)
+			{
+				if((GetTeamClientCount(CS_TEAM_CT) + 1 <= GetTeamClientCount(CS_TEAM_T) - 1 || (abs(GetTeamClientCount(CS_TEAM_CT) - GetTeamClientCount(CS_TEAM_T)) == 1 && GetTeamClientCount(CS_TEAM_T) > GetTeamClientCount(CS_TEAM_CT)) && GetTeamClientCount(CS_TEAM_CT) + 1 <= gc_iPreciseAutoBalanceCt.IntValue))
+				{
+					return true;
+				}
+				else if(GetTeamClientCount(CS_TEAM_CT) < gc_iPreciseAutoBalanceCt.IntValue && GetTeamClientCount(CS_TEAM_T) >= gc_iPreciseAutoBalanceT.IntValue)
+				{
+					return true;
 				}
 			}
 		}
 	}
-	else if(GetClientTeam(client) == CS_TEAM_CT)
+	else
 	{
-		switch(gc_iAutoBalanceMode.IntValue)
+		if(GetClientTeam(client) == CS_TEAM_SPECTATOR || GetClientTeam(client) == CS_TEAM_NONE)
 		{
-			case 1:
+			switch(gc_iAutoBalanceMode.IntValue)
 			{
-				switch(gc_iAutoBalanceLevel.IntValue)
+				case 1: // команда КТ является основной 
 				{
-				case EASY:
-				{
-					return true; // т.к. игрок за КТ, он свободно может зайти за Т при легком балансе
-				}
-				case MEDIUM:
-				{
-					return true;
-				}
-				case HARD:
-				{
-					if(team == CS_TEAM_T)
+					switch(gc_iAutoBalanceLevel.IntValue)
 					{
-						if(float(t + 1) / float(ct - 1) <= gc_iRatio.IntValue)
+					case EASY:
+					{
+						if(team == CS_TEAM_T)	
 						{
 							return true;
 						}
-						else if(float(t) / float(ct) >=  gc_iRatio.IntValue)
+						else if(RoundToMath(float(t) / float(ct + 1)) >= gc_iRatio.IntValue)
 						{
-							return false;
-						}
-						else 
-						{
-							return true;
+							if(team == CS_TEAM_CT)
+							{
+								return true;
+							}
 						}
 					}
-				}
-				}
-			}
-			case 2: 
-			{					
-				switch(gc_iAutoBalanceLevel.IntValue)
-				{
-				case EASY:
-				{ 
-					if(team == CS_TEAM_T)
+					case MEDIUM:
 					{
-						if(float(ct - 1) / float(t + 1) >= gc_iRatio.IntValue)
+						if(team == CS_TEAM_T)	
 						{
 							return true;
 						}
+						else if(RoundToMath(float(t) / float(ct + 1)) >= gc_iRatio.IntValue)
+						{
+							if(team == CS_TEAM_CT)
+							{
+								return true;
+							}
+						}
+					}
+					case HARD:
+					{
+						if(team == CS_TEAM_T)
+						{
+							if(float(t + 1) / float(ct) <= gc_iRatio.IntValue)
+							{
+								return true;
+							}
+							else if(float(t) / float(ct + 1) >=  gc_iRatio.IntValue)
+							{
+								return false;
+							}
+							else 
+							{
+								return true;
+							}
+						}
+						else if(team == CS_TEAM_CT)
+						{
+							if(float(t) / float(ct + 1) >= gc_iRatio.IntValue)
+							{
+								return true;
+							}
+						}
+					}
 					}
 				}
-				case MEDIUM:
-				{
-					if(team == CS_TEAM_T)
+				case 2: // команда Т является основной	
+				{		
+					switch(gc_iAutoBalanceLevel.IntValue)
 					{
-						if(float(ct - 1) / float(t + 1) >= gc_iRatio.IntValue)
+					case EASY:
+					{
+						if(team == CS_TEAM_CT)	
 						{
 							return true;
 						}
+						else if(RoundToMath(float(ct) / float(t + 1)) >= gc_iRatio.IntValue)
+						{
+							if(team == CS_TEAM_T)
+							{
+								return true;
+							}
+						}
 					}
-				}
-				case HARD:
-				{
-					if(team == CS_TEAM_T)
+					case MEDIUM:
 					{
-						if(float(ct - 1) / float(t + 1) >= gc_iRatio.IntValue)
+						if(team == CS_TEAM_CT)	
 						{
 							return true;
 						}
+						else if(RoundToMath(float(ct) / float(t + 1)) >= gc_iRatio.IntValue)
+						{
+							if(team == CS_TEAM_T)
+							{
+								return true;
+							}
+						}
 					}
-				}
+					case HARD:
+					{
+						if(team == CS_TEAM_CT)
+						{
+							if(float(ct + 1) / float(t) <= gc_iRatio.IntValue)
+							{
+								return true;
+							}
+							else if(float(ct) / float(t + 1) >=  gc_iRatio.IntValue)
+							{
+								return false;
+							}
+							else 
+							{
+								return true;
+							}
+						}
+						else if(team == CS_TEAM_T)
+						{
+							if(float(ct) / float(t + 1) >= gc_iRatio.IntValue)
+							{
+								return true;
+							}
+						}
+					}
+					}
 				}
 			}
 		}
-	}
-	else if(GetClientTeam(client) == CS_TEAM_T)
-	{
-		switch(gc_iAutoBalanceMode.IntValue)
+		else if(GetClientTeam(client) == CS_TEAM_CT)
 		{
-			case 1:
-			{				
-				switch(gc_iAutoBalanceLevel.IntValue)
+			switch(gc_iAutoBalanceMode.IntValue)
+			{
+				case 1:
 				{
-				case EASY:
-				{
-					if(gc_iRatio.IntValue > 1)
+					switch(gc_iAutoBalanceLevel.IntValue)
 					{
-						if(team == CS_TEAM_CT)
-						{
-							if(RoundToMath(float(t - 1) / float(ct + 1)) >= gc_iRatio.IntValue)
-							{
-								return true;
-							}
-						}
+					case EASY:
+					{
+						return true; // т.к. игрок за КТ, он свободно может зайти за Т при легком балансе
 					}
-					else
+					case MEDIUM:
 					{
-						if(team == CS_TEAM_CT)
-						{
-							if(float(t - 1) / float(ct + 1) >= gc_iRatio.IntValue)
-							{
-								return true;
-							}
-						}
+						return true;
 					}
-				}
-				case MEDIUM:
-				{
-					if(gc_iRatio.IntValue > 1)
+					case HARD:
 					{
-						if(team == CS_TEAM_CT)
+						if(team == CS_TEAM_T)
 						{
-							if(RoundToMath(float(t - 1) / float(ct + 1)) >= gc_iRatio.IntValue)
+							if(float(t + 1) / float(ct - 1) <= gc_iRatio.IntValue)
 							{
 								return true;
 							}
-						}
-					}
-					else
-					{
-						if(team == CS_TEAM_CT)
-						{
-							if(float(t - 1) / float(ct + 1) >= gc_iRatio.IntValue)
-							{
-								return true;
-							}
-						}
-					}
-				}
-				case HARD:
-				{
-					if(gc_iRatio.IntValue > 1)
-					{
-						if(team == CS_TEAM_CT)
-						{
-							if(RoundToMath(float(t - 1) / float(ct + 1)) >= gc_iRatio.IntValue)
-							{
-								return true;
-							}
-						}
-					}
-					else
-					{
-						if(team == CS_TEAM_CT)
-						{
-							if(float(t - 1) / float(ct + 1) >= gc_iRatio.IntValue)
-							{
-								return true;
-							}
-						}
-					}
-				}
-				}
-			}
-			case 2: 
-			{				
-				switch(gc_iAutoBalanceLevel.IntValue)
-				{
-				case EASY:
-				{
-					return true; // т.к. игрок за Т, он свободно может зайти за КТ при легком балансе
-				}
-				case MEDIUM:
-				{
-					return true;
-				}
-				case HARD:
-				{
-					if(gc_iRatio.IntValue > 1)
-					{
-						if(team == CS_TEAM_CT)
-						{
-							if(RoundToMath(float(ct + 1) / float(t - 1)) <= gc_iRatio.IntValue)
-							{
-								return true;
-							}
-							else if(RoundToMath(float(ct - 1) / float(t + 1)) >=  gc_iRatio.IntValue)
+							else if(float(t) / float(ct) >=  gc_iRatio.IntValue)
 							{
 								return false;
 							}
@@ -5529,25 +5473,177 @@ public bool CheckBalance(int client, int t, int ct, int team)
 							}
 						}
 					}
-					else
+					}
+				}
+				case 2: 
+				{					
+					switch(gc_iAutoBalanceLevel.IntValue)
 					{
-						if(team == CS_TEAM_CT)
+					case EASY:
+					{ 
+						if(team == CS_TEAM_T)
 						{
-							if(float(ct + 1) / float(t - 1) <= gc_iRatio.IntValue)
-							{
-								return true;
-							}
-							else if(float(ct - 1) / float(t + 1) >=  gc_iRatio.IntValue)
-							{
-								return false;
-							}
-							else 
+							if(float(ct - 1) / float(t + 1) >= gc_iRatio.IntValue)
 							{
 								return true;
 							}
 						}
 					}
+					case MEDIUM:
+					{
+						if(team == CS_TEAM_T)
+						{
+							if(float(ct - 1) / float(t + 1) >= gc_iRatio.IntValue)
+							{
+								return true;
+							}
+						}
+					}
+					case HARD:
+					{
+						if(team == CS_TEAM_T)
+						{
+							if(float(ct - 1) / float(t + 1) >= gc_iRatio.IntValue)
+							{
+								return true;
+							}
+						}
+					}
+					}
 				}
+			}
+		}
+		else if(GetClientTeam(client) == CS_TEAM_T)
+		{
+			switch(gc_iAutoBalanceMode.IntValue)
+			{
+				case 1:
+				{				
+					switch(gc_iAutoBalanceLevel.IntValue)
+					{
+					case EASY:
+					{
+						if(gc_iRatio.IntValue > 1)
+						{
+							if(team == CS_TEAM_CT)
+							{
+								if(RoundToMath(float(t - 1) / float(ct + 1)) >= gc_iRatio.IntValue)
+								{
+									return true;
+								}
+							}
+						}
+						else
+						{
+							if(team == CS_TEAM_CT)
+							{
+								if(float(t - 1) / float(ct + 1) >= gc_iRatio.IntValue)
+								{
+									return true;
+								}
+							}
+						}
+					}
+					case MEDIUM:
+					{
+						if(gc_iRatio.IntValue > 1)
+						{
+							if(team == CS_TEAM_CT)
+							{
+								if(RoundToMath(float(t - 1) / float(ct + 1)) >= gc_iRatio.IntValue)
+								{
+									return true;
+								}
+							}
+						}
+						else
+						{
+							if(team == CS_TEAM_CT)
+							{
+								if(float(t - 1) / float(ct + 1) >= gc_iRatio.IntValue)
+								{
+									return true;
+								}
+							}
+						}
+					}
+					case HARD:
+					{
+						if(gc_iRatio.IntValue > 1)
+						{
+							if(team == CS_TEAM_CT)
+							{
+								if(RoundToMath(float(t - 1) / float(ct + 1)) >= gc_iRatio.IntValue)
+								{
+									return true;
+								}
+							}
+						}
+						else
+						{
+							if(team == CS_TEAM_CT)
+							{
+								if(float(t - 1) / float(ct + 1) >= gc_iRatio.IntValue)
+								{
+									return true;
+								}
+							}
+						}
+					}
+					}
+				}
+				case 2: 
+				{				
+					switch(gc_iAutoBalanceLevel.IntValue)
+					{
+					case EASY:
+					{
+						return true; // т.к. игрок за Т, он свободно может зайти за КТ при легком балансе
+					}
+					case MEDIUM:
+					{
+						return true;
+					}
+					case HARD:
+					{
+						if(gc_iRatio.IntValue > 1)
+						{
+							if(team == CS_TEAM_CT)
+							{
+								if(RoundToMath(float(ct + 1) / float(t - 1)) <= gc_iRatio.IntValue)
+								{
+									return true;
+								}
+								else if(RoundToMath(float(ct - 1) / float(t + 1)) >=  gc_iRatio.IntValue)
+								{
+									return false;
+								}
+								else 
+								{
+									return true;
+								}
+							}
+						}
+						else
+						{
+							if(team == CS_TEAM_CT)
+							{
+								if(float(ct + 1) / float(t - 1) <= gc_iRatio.IntValue)
+								{
+									return true;
+								}
+								else if(float(ct - 1) / float(t + 1) >=  gc_iRatio.IntValue)
+								{
+									return false;
+								}
+								else 
+								{
+									return true;
+								}
+							}
+						}
+					}
+					}
 				}
 			}
 		}
@@ -5707,57 +5803,186 @@ public void CTRelationT(int client)
 				Cts++;
 			}
 			
-			if(IsClientInGame(players[i]) && GetClientTeam(players[i]) == CS_TEAM_CT && GetTeamClientCount(CS_TEAM_CT) > 1 && float(GetTeamClientCount(CS_TEAM_T)) / float(GetTeamClientCount(CS_TEAM_CT)) < gc_iRatio.IntValue)
+			if(!gc_iPreciseAutoBalnce.BoolValue && gc_iRatio.BoolValue)
 			{
-				int factor = RoundToCeil(float(GetTeamClientCount(CS_TEAM_T)) / gc_iRatio.FloatValue); // кол-во доступных игроков за КТ
-				
-				if(Cts > factor)
+				if(IsClientInGame(players[i]) && GetClientTeam(players[i]) == CS_TEAM_CT && GetTeamClientCount(CS_TEAM_CT) > 1 && float(GetTeamClientCount(CS_TEAM_T)) / float(GetTeamClientCount(CS_TEAM_CT)) < gc_iRatio.IntValue)
 				{
-					if(IsPlayerBannedTeam(players[i], CS_TEAM_T))
+					int factor = RoundToCeil(float(GetTeamClientCount(CS_TEAM_T)) / gc_iRatio.FloatValue); // кол-во доступных игроков за КТ
+					
+					if(Cts > factor)
 					{
-						continue; // если игроку нельзя в другую команду - пропускаем итерацию
+						if(IsPlayerBannedTeam(players[i], CS_TEAM_T))
+						{
+							continue; // если игроку нельзя в другую команду - пропускаем итерацию
+						}
+						
+						if(IsPlayerImmunity(players[i]))
+						{
+							continue; // если у игрока иммунитет - пропускаем итерацию 
+						}
+						
+						if(g_bSwapFilters)
+						{
+							SwapFilter(players[i], CS_TEAM_CT);
+						}
+						else												
+						{
+							ChangeTeam(players[i]);
+							SetImmunity(players[i], true);
+						}
 					}
-					if(IsPlayerImmunity(players[i]))
+				}
+				else if(IsClientInGame(players[i]) && GetClientTeam(players[i]) == CS_TEAM_T && float(GetTeamClientCount(CS_TEAM_T)) / float(Cts) > gc_iRatio.IntValue)
+				{
+					if(float(GetTeamClientCount(CS_TEAM_T) - 1) / float(GetTeamClientCount(CS_TEAM_CT) + 1) > gc_iRatio.IntValue)
 					{
-						continue; // если у игрока иммунитет - пропускаем итерацию 
-					}
-					if(g_bSwapFilters)
-					{
-						SwapFilter(players[i], CS_TEAM_CT);
-					}
-					else												
-					{
-						ChangeTeam(players[i]);
-						SetImmunity(players[i], true);
+						if(IsPlayerBannedTeam(players[i], CS_TEAM_CT))
+						{
+							continue; 
+						}
+						
+						if(IsPlayerImmunity(players[i]))
+						{
+							continue; 
+						}
+						
+						if(g_bSwapFilters)
+						{
+							SwapFilter(players[i], CS_TEAM_T);
+						}
+						else
+						{
+							ChangeTeam(players[i]);
+							SetImmunity(players[i], true);
+						}
 					}
 				}
 			}
-			else if(IsClientInGame(players[i]) && GetClientTeam(players[i]) == CS_TEAM_T && float(GetTeamClientCount(CS_TEAM_T)) / float(Cts) > gc_iRatio.IntValue)
+			else // если должны получить определенную пропорцию
 			{
-				if(float(GetTeamClientCount(CS_TEAM_T) - 1) / float(GetTeamClientCount(CS_TEAM_CT) + 1) > gc_iRatio.IntValue)
+				if(GetTeamClientCount(CS_TEAM_CT) > 1 || GetTeamClientCount(CS_TEAM_T) > 1)
 				{
-					if(IsPlayerBannedTeam(players[i], CS_TEAM_CT))
+					if(GetTeamClientCount(CS_TEAM_CT) > gc_iPreciseAutoBalanceCt.IntValue || GetTeamClientCount(CS_TEAM_T) > gc_iPreciseAutoBalanceT.IntValue)
 					{
-						continue; 
+						if(GetTeamClientCount(CS_TEAM_CT) > gc_iPreciseAutoBalanceCt.IntValue)
+						{
+							if(GetTeamClientCount(CS_TEAM_T) < gc_iPreciseAutoBalanceT.IntValue && GetClientTeam(players[i]) == CS_TEAM_CT)
+							{
+								if(IsPlayerBannedTeam(players[i], CS_TEAM_T))
+								{
+									continue; 
+								}
+								
+								if(IsPlayerImmunity(players[i]))
+								{
+									continue; 
+								}
+								
+								if(g_bSwapFilters)
+								{
+									SwapFilter(players[i], CS_TEAM_CT);
+								}
+								else
+								{
+									ChangeTeam(players[i]);
+									SetImmunity(players[i], true);
+								}
+								
+								continue;
+							}
+							else if(GetTeamClientCount(CS_TEAM_T) >= gc_iPreciseAutoBalanceT.IntValue && GetClientTeam(players[i]) == CS_TEAM_CT)
+							{
+								MyChangeClientTeam(players[i], CS_TEAM_SPECTATOR);
+							}
+						}
+						
+						if(GetTeamClientCount(CS_TEAM_T) > gc_iPreciseAutoBalanceT.IntValue)
+						{
+							if(GetTeamClientCount(CS_TEAM_CT) < gc_iPreciseAutoBalanceCt.IntValue && GetClientTeam(players[i]) == CS_TEAM_T)
+							{
+								if(IsPlayerBannedTeam(players[i], CS_TEAM_CT))
+								{
+									continue; 
+								}
+								
+								if(IsPlayerImmunity(players[i]))
+								{
+									continue; 
+								}
+								
+								if(g_bSwapFilters)
+								{
+									SwapFilter(players[i], CS_TEAM_T);
+								}
+								else
+								{
+									ChangeTeam(players[i]);
+									SetImmunity(players[i], true);
+								}
+								
+								continue;
+							}
+							else if(GetTeamClientCount(CS_TEAM_CT) >= gc_iPreciseAutoBalanceCt.IntValue && GetClientTeam(players[i]) == CS_TEAM_T)
+							{
+								MyChangeClientTeam(players[i], CS_TEAM_SPECTATOR);
+							}
+						}
 					}
-					if(IsPlayerImmunity(players[i]))
+					else if(GetTeamClientCount(CS_TEAM_T) < gc_iPreciseAutoBalanceT.IntValue && GetTeamClientCount(CS_TEAM_CT) > GetTeamClientCount(CS_TEAM_T) + 1)
 					{
-						continue; 
+						if(GetClientTeam(players[i]) == CS_TEAM_CT)
+						{
+							if(IsPlayerBannedTeam(players[i], CS_TEAM_T))
+							{
+								continue; 
+							}
+							
+							if(IsPlayerImmunity(players[i]))
+							{
+								continue; 
+							}
+							
+							if(g_bSwapFilters)
+							{
+								SwapFilter(players[i], CS_TEAM_CT);
+							}
+							else
+							{
+								ChangeTeam(players[i]);
+								SetImmunity(players[i], true);
+							}
+						}
 					}
-					if(g_bSwapFilters)
+					else if(GetTeamClientCount(CS_TEAM_CT) < gc_iPreciseAutoBalanceCt.IntValue && GetTeamClientCount(CS_TEAM_T) > GetTeamClientCount(CS_TEAM_CT) + 1)
 					{
-						SwapFilter(players[i], CS_TEAM_T);
-					}
-					else
-					{
-						ChangeTeam(players[i]);
-						SetImmunity(players[i], true);
+						if(GetClientTeam(players[i]) == CS_TEAM_T)
+						{
+							if(IsPlayerBannedTeam(players[i], CS_TEAM_CT))
+							{
+								continue; 
+							}
+							
+							if(IsPlayerImmunity(players[i]))
+							{
+								continue; 
+							}
+							
+							if(g_bSwapFilters)
+							{
+								SwapFilter(players[i], CS_TEAM_T);
+							}
+							else
+							{
+								ChangeTeam(players[i]);
+								SetImmunity(players[i], true);
+							}
+						}
 					}
 				}
 			}
 		}
 	}
-	else if(client != 0)
+	else if(client != 0 && IsClientInGame(client) && !IsClientSourceTV(client) && !IsClientReplay(client))
 	{
 		int Cts = GetTeamClientCount(CS_TEAM_CT);
 			
@@ -5766,49 +5991,174 @@ public void CTRelationT(int client)
 			Cts++;
 		}
 		
-		if(IsClientInGame(client) && (GetClientTeam(client) == CS_TEAM_SPECTATOR ||  GetClientTeam(client) == CS_TEAM_NONE) && GetTeamClientCount(CS_TEAM_CT) > 1 && float(GetTeamClientCount(CS_TEAM_T)) / float(GetTeamClientCount(CS_TEAM_CT)) < gc_iRatio.IntValue)
+		if(!gc_iPreciseAutoBalnce.BoolValue && gc_iRatio.BoolValue)
 		{
-			int factor = RoundToCeil(float(GetTeamClientCount(CS_TEAM_T)) / gc_iRatio.FloatValue); // кол-во доступных игроков за КТ
-			
-			if(IsPlayerImmunity(client)) 
+			if((GetClientTeam(client) == CS_TEAM_SPECTATOR ||  GetClientTeam(client) == CS_TEAM_NONE) && GetTeamClientCount(CS_TEAM_CT) > 1 && float(GetTeamClientCount(CS_TEAM_T)) / float(GetTeamClientCount(CS_TEAM_CT)) < gc_iRatio.IntValue)
 			{
-				return; 
-			}	
-			
-			if(Cts + 1 >= factor) // проверяем слот т.к. спектатор будет подключен к кт
-			{
-				if(IsPlayerBannedTeam(client, CS_TEAM_T))
+				int factor = RoundToCeil(float(GetTeamClientCount(CS_TEAM_T)) / gc_iRatio.FloatValue); // кол-во доступных игроков за КТ
+				
+				if(IsPlayerImmunity(client)) 
 				{
 					return; 
+				}	
+				
+				if(Cts + 1 >= factor) // проверяем слот т.к. спектатор будет подключен к кт
+				{
+					if(IsPlayerBannedTeam(client, CS_TEAM_T))
+					{
+						return; 
+					}
+					ChangeTeamSolo(client, CS_TEAM_T);
+					SetImmunity(client, true);
 				}
-				ChangeTeamSolo(client, CS_TEAM_T);
-				SetImmunity(client, true);
+				else
+				{
+					if(IsPlayerBannedTeam(client, CS_TEAM_CT))
+					{
+						return; 
+					}
+					ChangeTeamSolo(client, CS_TEAM_CT);
+					SetImmunity(client, true);
+				}
 			}
-			else
+			else if((GetClientTeam(client) == CS_TEAM_SPECTATOR || GetClientTeam(client) == CS_TEAM_NONE) && float(GetTeamClientCount(CS_TEAM_T)) / float(Cts) > gc_iRatio.IntValue)
 			{
-				if(IsPlayerBannedTeam(client, CS_TEAM_CT))
+				if(IsPlayerImmunity(client)) 
 				{
 					return; 
 				}
-				ChangeTeamSolo(client, CS_TEAM_CT);
-				SetImmunity(client, true);
+				
+				if(float(GetTeamClientCount(CS_TEAM_T) - 1) / float(GetTeamClientCount(CS_TEAM_CT) + 1) > gc_iRatio.IntValue)
+				{
+					if(IsPlayerBannedTeam(client, CS_TEAM_CT))
+					{
+						return; 
+					}
+					ChangeTeamSolo(client, CS_TEAM_CT);
+					SetImmunity(client, true);
+				}
 			}
 		}
-		else if(IsClientInGame(client) && (GetClientTeam(client) == CS_TEAM_SPECTATOR || GetClientTeam(client) == CS_TEAM_NONE) && float(GetTeamClientCount(CS_TEAM_T)) / float(Cts) > gc_iRatio.IntValue)
+		else 
 		{
-			if(IsPlayerImmunity(client)) 
+			if(GetTeamClientCount(CS_TEAM_CT) > 1 || GetTeamClientCount(CS_TEAM_T) > 1)
 			{
-				return; 
-			}
-			
-			if(float(GetTeamClientCount(CS_TEAM_T) - 1) / float(GetTeamClientCount(CS_TEAM_CT) + 1) > gc_iRatio.IntValue)
-			{
-				if(IsPlayerBannedTeam(client, CS_TEAM_CT))
+				if(GetTeamClientCount(CS_TEAM_CT) > gc_iPreciseAutoBalanceCt.IntValue || GetTeamClientCount(CS_TEAM_T) > gc_iPreciseAutoBalanceT.IntValue)
 				{
-					return; 
+					if(GetTeamClientCount(CS_TEAM_CT) > gc_iPreciseAutoBalanceCt.IntValue)
+						{
+							if(GetTeamClientCount(CS_TEAM_T) < gc_iPreciseAutoBalanceT.IntValue && GetClientTeam(client) == CS_TEAM_CT)
+							{
+								if(IsPlayerBannedTeam(client, CS_TEAM_CT))
+								{
+									return; 
+								}
+								
+								if(IsPlayerImmunity(client))
+								{
+									return; 
+								}
+								
+								if(g_bSwapFilters)
+								{
+									SwapFilter(client, CS_TEAM_T);
+								}
+								else
+								{
+									ChangeTeam(client);
+									SetImmunity(client, true);
+								}
+								
+								return;
+							}
+							else if(GetTeamClientCount(CS_TEAM_T) >= gc_iPreciseAutoBalanceT.IntValue && GetClientTeam(client) == CS_TEAM_CT)
+							{
+								MyChangeClientTeam(client, CS_TEAM_SPECTATOR);
+							}
+						}
+						
+						if(GetTeamClientCount(CS_TEAM_T) > gc_iPreciseAutoBalanceT.IntValue)
+						{
+							if(GetTeamClientCount(CS_TEAM_CT) < gc_iPreciseAutoBalanceCt.IntValue && GetClientTeam(client) == CS_TEAM_T)
+							{
+								if(IsPlayerBannedTeam(client, CS_TEAM_T))
+								{
+									return; 
+								}
+								
+								if(IsPlayerImmunity(client))
+								{
+									return; 
+								}
+								
+								if(g_bSwapFilters)
+								{
+									SwapFilter(client, CS_TEAM_CT);
+								}
+								else
+								{
+									ChangeTeam(client);
+									SetImmunity(client, true);
+								}
+								
+								return;
+							}
+							else if(GetTeamClientCount(CS_TEAM_CT) >= gc_iPreciseAutoBalanceCt.IntValue && GetClientTeam(client) == CS_TEAM_T)
+							{
+								MyChangeClientTeam(client, CS_TEAM_SPECTATOR);
+							}
+						}
 				}
-				ChangeTeamSolo(client, CS_TEAM_CT);
-				SetImmunity(client, true);
+				else if(GetTeamClientCount(CS_TEAM_T) < gc_iPreciseAutoBalanceT.IntValue && GetTeamClientCount(CS_TEAM_CT) > GetTeamClientCount(CS_TEAM_T) + 1)
+				{
+					if(GetClientTeam(client) == CS_TEAM_CT)
+					{
+						if(IsPlayerBannedTeam(client, CS_TEAM_T))
+						{
+							return; 
+						}
+
+						if(IsPlayerImmunity(client))
+						{
+							return; 
+						}
+							
+						if(g_bSwapFilters)
+						{
+							SwapFilter(client, CS_TEAM_CT);
+						}
+						else
+						{
+							ChangeTeam(client);
+							SetImmunity(client, true);
+						}
+					}
+				}
+				else if(GetTeamClientCount(CS_TEAM_CT) < gc_iPreciseAutoBalanceT.IntValue && GetTeamClientCount(CS_TEAM_T) > GetTeamClientCount(CS_TEAM_CT) + 1)
+				{
+					if(GetClientTeam(client) == CS_TEAM_T)
+					{
+						if(IsPlayerBannedTeam(client, CS_TEAM_CT))
+						{
+							return; 
+						}
+						
+						if(IsPlayerImmunity(client))
+						{
+							return; 
+						}
+						
+						if(g_bSwapFilters)
+						{
+							SwapFilter(client, CS_TEAM_T);
+						}
+						else
+						{
+							ChangeTeam(client);
+							SetImmunity(client, true);
+						}
+					}
+				}
 			}
 		}
 	}
@@ -5856,57 +6206,182 @@ public void TRelationCT(int client)
 				Ts++;
 			}
 			
-			if(IsClientInGame(players[i]) && GetClientTeam(players[i]) == CS_TEAM_T && GetTeamClientCount(CS_TEAM_T) > 1 &&  GetTeamClientCount(CS_TEAM_CT) / GetTeamClientCount(CS_TEAM_T) < gc_iRatio.IntValue)
+			if(!gc_iPreciseAutoBalnce.BoolValue && gc_iRatio.BoolValue)
 			{
-				int factor = RoundToCeil(float(GetTeamClientCount(CS_TEAM_CT)) / gc_iRatio.FloatValue); // кол-во доступных игроков за КТ
-				
-				if(Ts > factor)
+				if(IsClientInGame(players[i]) && GetClientTeam(players[i]) == CS_TEAM_T && GetTeamClientCount(CS_TEAM_T) > 1 &&  GetTeamClientCount(CS_TEAM_CT) / GetTeamClientCount(CS_TEAM_T) < gc_iRatio.IntValue)
 				{
-					if(IsPlayerBannedTeam(players[i], CS_TEAM_T))
+					int factor = RoundToCeil(float(GetTeamClientCount(CS_TEAM_CT)) / gc_iRatio.FloatValue); // кол-во доступных игроков за КТ
+					
+					if(Ts > factor)
 					{
-						continue; 
+						if(IsPlayerBannedTeam(players[i], CS_TEAM_T))
+						{
+							continue; 
+						}
+						if(IsPlayerImmunity(players[i]))
+						{
+							continue; // если у игрока иммунитет - пропускаем итерацию 
+						}
+						if(g_bSwapFilters)
+						{
+							SwapFilter(players[i], CS_TEAM_T);
+						}
+						else												
+						{
+							ChangeTeam(players[i]);
+							SetImmunity(players[i], true);
+						}
 					}
-					if(IsPlayerImmunity(players[i]))
+				}
+				else if(IsClientInGame(players[i]) && GetClientTeam(players[i]) == CS_TEAM_CT && float(GetTeamClientCount(CS_TEAM_CT)) / float(Ts) > gc_iRatio.IntValue)
+				{
+					if(float(GetTeamClientCount(CS_TEAM_CT) - 1) / float(GetTeamClientCount(CS_TEAM_T) + 1) > gc_iRatio.IntValue)
 					{
-						continue; // если у игрока иммунитет - пропускаем итерацию 
-					}
-					if(g_bSwapFilters)
-					{
-						SwapFilter(players[i], CS_TEAM_T);
-					}
-					else												
-					{
-						ChangeTeam(players[i]);
-						SetImmunity(players[i], true);
+						if(IsPlayerBannedTeam(players[i], CS_TEAM_CT))
+						{
+							continue; 
+						}
+						if(IsPlayerImmunity(players[i]))
+						{
+							continue; 
+						}
+						if(g_bSwapFilters)
+						{
+							SwapFilter(players[i], CS_TEAM_CT);
+						}
+						else
+						{
+							ChangeTeam(players[i]);
+							SetImmunity(players[i], true);
+						}
 					}
 				}
 			}
-			else if(IsClientInGame(players[i]) && GetClientTeam(players[i]) == CS_TEAM_CT && float(GetTeamClientCount(CS_TEAM_CT)) / float(Ts) > gc_iRatio.IntValue)
+			else
 			{
-				if(float(GetTeamClientCount(CS_TEAM_CT) - 1) / float(GetTeamClientCount(CS_TEAM_T) + 1) > gc_iRatio.IntValue)
+				if(GetTeamClientCount(CS_TEAM_CT) > 1 || GetTeamClientCount(CS_TEAM_T) > 1)
 				{
-					if(IsPlayerBannedTeam(players[i], CS_TEAM_CT))
+					if(GetTeamClientCount(CS_TEAM_CT) > gc_iPreciseAutoBalanceCt.IntValue || GetTeamClientCount(CS_TEAM_T) > gc_iPreciseAutoBalanceT.IntValue)
 					{
-						continue; 
+						if(GetTeamClientCount(CS_TEAM_CT) > gc_iPreciseAutoBalanceCt.IntValue)
+						{
+							if(GetTeamClientCount(CS_TEAM_T) < gc_iPreciseAutoBalanceT.IntValue && GetClientTeam(players[i]) == CS_TEAM_CT)
+							{
+								if(IsPlayerBannedTeam(players[i], CS_TEAM_T))
+								{
+									continue; 
+								}
+								
+								if(IsPlayerImmunity(players[i]))
+								{
+									continue; 
+								}
+								
+								if(g_bSwapFilters)
+								{
+									SwapFilter(players[i], CS_TEAM_CT);
+								}
+								else
+								{
+									ChangeTeam(players[i]);
+									SetImmunity(players[i], true);
+								}
+								
+								continue;
+							}
+							else if(GetTeamClientCount(CS_TEAM_T) >= gc_iPreciseAutoBalanceT.IntValue && GetClientTeam(players[i]) == CS_TEAM_CT)
+							{
+								MyChangeClientTeam(players[i], CS_TEAM_SPECTATOR);
+							}
+						}
+						
+						if(GetTeamClientCount(CS_TEAM_T) > gc_iPreciseAutoBalanceT.IntValue)
+						{
+							if(GetTeamClientCount(CS_TEAM_CT) < gc_iPreciseAutoBalanceCt.IntValue && GetClientTeam(players[i]) == CS_TEAM_T)
+							{
+								if(IsPlayerBannedTeam(players[i], CS_TEAM_CT))
+								{
+									continue; 
+								}
+								
+								if(IsPlayerImmunity(players[i]))
+								{
+									continue; 
+								}
+								
+								if(g_bSwapFilters)
+								{
+									SwapFilter(players[i], CS_TEAM_T);
+								}
+								else
+								{
+									ChangeTeam(players[i]);
+									SetImmunity(players[i], true);
+								}
+								
+								continue;
+							}
+							else if(GetTeamClientCount(CS_TEAM_CT) >= gc_iPreciseAutoBalanceCt.IntValue && GetClientTeam(players[i]) == CS_TEAM_T)
+							{
+								MyChangeClientTeam(players[i], CS_TEAM_SPECTATOR);
+							}
+						}
 					}
-					if(IsPlayerImmunity(players[i]))
+					else if(GetTeamClientCount(CS_TEAM_T) < gc_iPreciseAutoBalanceT.IntValue && GetTeamClientCount(CS_TEAM_CT) > GetTeamClientCount(CS_TEAM_T) + 1)
 					{
-						continue; 
+						if(GetClientTeam(players[i]) == CS_TEAM_CT)
+						{
+							if(IsPlayerBannedTeam(players[i], CS_TEAM_T))
+							{
+								continue; 
+							}
+							
+							if(IsPlayerImmunity(players[i]))
+							{
+								continue; 
+							}
+							
+							if(g_bSwapFilters)
+							{
+								SwapFilter(players[i], CS_TEAM_CT);
+							}
+							else
+							{
+								ChangeTeam(players[i]);
+								SetImmunity(players[i], true);
+							}
+						}
 					}
-					if(g_bSwapFilters)
+					else if(GetTeamClientCount(CS_TEAM_CT) < gc_iPreciseAutoBalanceT.IntValue && GetTeamClientCount(CS_TEAM_T) > GetTeamClientCount(CS_TEAM_CT) + 1)
 					{
-						SwapFilter(players[i], CS_TEAM_CT);
-					}
-					else
-					{
-						ChangeTeam(players[i]);
-						SetImmunity(players[i], true);
+						if(GetClientTeam(players[i]) == CS_TEAM_T)
+						{
+							if(IsPlayerBannedTeam(players[i], CS_TEAM_CT))
+							{
+								continue; 
+							}
+							
+							if(IsPlayerImmunity(players[i]))
+							{
+								continue; 
+							}
+							
+							if(g_bSwapFilters)
+							{
+								SwapFilter(players[i], CS_TEAM_T);
+							}
+							else
+							{
+								ChangeTeam(players[i]);
+								SetImmunity(players[i], true);
+							}
+						}
 					}
 				}
 			}
 		}
 	}
-	else if(client != 0)
+	else if(client != 0 && IsClientInGame(client) && !IsClientSourceTV(client) && !IsClientReplay(client))
 	{
 		int Ts = GetTeamClientCount(CS_TEAM_T);
 			
@@ -5915,49 +6390,174 @@ public void TRelationCT(int client)
 			Ts++;
 		}
 		
-		if(IsClientInGame(client) && (GetClientTeam(client) == CS_TEAM_SPECTATOR || GetClientTeam(client) == CS_TEAM_NONE) && GetTeamClientCount(CS_TEAM_T) > 1 &&  float(GetTeamClientCount(CS_TEAM_CT)) / float(GetTeamClientCount(CS_TEAM_T)) < gc_iRatio.IntValue)
+		if(!gc_iPreciseAutoBalnce.BoolValue && gc_iRatio.BoolValue)
 		{
-			int factor = RoundToCeil(float(GetTeamClientCount(CS_TEAM_T)) / gc_iRatio.FloatValue); // кол-во доступных игроков за КТ
-					
-			if(IsPlayerImmunity(client))
+			if((GetClientTeam(client) == CS_TEAM_SPECTATOR || GetClientTeam(client) == CS_TEAM_NONE) && GetTeamClientCount(CS_TEAM_T) > 1 &&  float(GetTeamClientCount(CS_TEAM_CT)) / float(GetTeamClientCount(CS_TEAM_T)) < gc_iRatio.IntValue)
 			{
-				return; 
-			}
-					
-			if(Ts + 1 >= factor) // проверяем слот т.к. спектатор будет подключен к кт
-			{
-				if(IsPlayerBannedTeam(client, CS_TEAM_CT))
+				int factor = RoundToCeil(float(GetTeamClientCount(CS_TEAM_T)) / gc_iRatio.FloatValue); // кол-во доступных игроков за КТ
+						
+				if(IsPlayerImmunity(client))
 				{
 					return; 
 				}
-				ChangeTeamSolo(client, CS_TEAM_CT);
-				SetImmunity(client, true);
+						
+				if(Ts + 1 >= factor) // проверяем слот т.к. спектатор будет подключен к кт
+				{
+					if(IsPlayerBannedTeam(client, CS_TEAM_CT))
+					{
+						return; 
+					}
+					ChangeTeamSolo(client, CS_TEAM_CT);
+					SetImmunity(client, true);
+				}
+				else
+				{
+					if(IsPlayerBannedTeam(client, CS_TEAM_T))
+					{
+						return; 
+					}
+					ChangeTeamSolo(client, CS_TEAM_T);
+					SetImmunity(client, true);
+				}
 			}
-			else
+			else if((GetClientTeam(client) == CS_TEAM_SPECTATOR || GetClientTeam(client) == CS_TEAM_NONE) && float(GetTeamClientCount(CS_TEAM_CT)) / float(Ts) > gc_iRatio.IntValue)
 			{
-				if(IsPlayerBannedTeam(client, CS_TEAM_T))
+				if(IsPlayerImmunity(client))
 				{
 					return; 
 				}
-				ChangeTeamSolo(client, CS_TEAM_T);
-				SetImmunity(client, true);
+				
+				if(float(GetTeamClientCount(CS_TEAM_CT)) / float(GetTeamClientCount(CS_TEAM_T) + 1) >= gc_iRatio.IntValue)
+				{
+					if(IsPlayerBannedTeam(client, CS_TEAM_T))
+					{
+						return; 
+					}
+					ChangeTeamSolo(client, CS_TEAM_T);
+					SetImmunity(client, true);
+				}
 			}
 		}
-		else if(IsClientInGame(client) && (GetClientTeam(client) == CS_TEAM_SPECTATOR || GetClientTeam(client) == CS_TEAM_NONE) && float(GetTeamClientCount(CS_TEAM_CT)) / float(Ts) > gc_iRatio.IntValue)
+		else
 		{
-			if(IsPlayerImmunity(client))
+			if(GetTeamClientCount(CS_TEAM_CT) > 1 || GetTeamClientCount(CS_TEAM_T) > 1)
 			{
-				return; 
-			}
-			
-			if(float(GetTeamClientCount(CS_TEAM_CT)) / float(GetTeamClientCount(CS_TEAM_T) + 1) >= gc_iRatio.IntValue)
-			{
-				if(IsPlayerBannedTeam(client, CS_TEAM_T))
+				if(GetTeamClientCount(CS_TEAM_CT) > gc_iPreciseAutoBalanceCt.IntValue || GetTeamClientCount(CS_TEAM_T) > gc_iPreciseAutoBalanceT.IntValue)
 				{
-					return; 
+					if(GetTeamClientCount(CS_TEAM_CT) > gc_iPreciseAutoBalanceCt.IntValue)
+						{
+							if(GetTeamClientCount(CS_TEAM_T) < gc_iPreciseAutoBalanceT.IntValue && GetClientTeam(client) == CS_TEAM_CT)
+							{
+								if(IsPlayerBannedTeam(client, CS_TEAM_T))
+								{
+									return; 
+								}
+								
+								if(IsPlayerImmunity(client))
+								{
+									return; 
+								}
+								
+								if(g_bSwapFilters)
+								{
+									SwapFilter(client, CS_TEAM_CT);
+								}
+								else
+								{
+									ChangeTeam(client);
+									SetImmunity(client, true);
+								}
+								
+								return;
+							}
+							else if(GetTeamClientCount(CS_TEAM_T) >= gc_iPreciseAutoBalanceT.IntValue && GetClientTeam(client) == CS_TEAM_CT)
+							{
+								MyChangeClientTeam(client, CS_TEAM_SPECTATOR);
+							}
+						}
+						
+						if(GetTeamClientCount(CS_TEAM_T) > gc_iPreciseAutoBalanceT.IntValue)
+						{
+							if(GetTeamClientCount(CS_TEAM_CT) < gc_iPreciseAutoBalanceCt.IntValue && GetClientTeam(client) == CS_TEAM_T)
+							{
+								if(IsPlayerBannedTeam(client, CS_TEAM_CT))
+								{
+									return; 
+								}
+								
+								if(IsPlayerImmunity(client))
+								{
+									return; 
+								}
+								
+								if(g_bSwapFilters)
+								{
+									SwapFilter(client, CS_TEAM_T);
+								}
+								else
+								{
+									ChangeTeam(client);
+									SetImmunity(client, true);
+								}
+								
+								return;
+							}
+							else if(GetTeamClientCount(CS_TEAM_CT) >= gc_iPreciseAutoBalanceCt.IntValue && GetClientTeam(client) == CS_TEAM_T)
+							{
+								MyChangeClientTeam(client, CS_TEAM_SPECTATOR);
+							}
+						}
 				}
-				ChangeTeamSolo(client, CS_TEAM_T);
-				SetImmunity(client, true);
+				else if(GetTeamClientCount(CS_TEAM_T) < gc_iPreciseAutoBalanceT.IntValue && GetTeamClientCount(CS_TEAM_CT) > GetTeamClientCount(CS_TEAM_T) + 1)
+				{
+					if(GetClientTeam(client) == CS_TEAM_CT)
+					{
+						if(IsPlayerBannedTeam(client, CS_TEAM_T))
+						{
+							return; 
+						}
+
+						if(IsPlayerImmunity(client))
+						{
+							return; 
+						}
+							
+						if(g_bSwapFilters)
+						{
+							SwapFilter(client, CS_TEAM_CT);
+						}
+						else
+						{
+							ChangeTeam(client);
+							SetImmunity(client, true);
+						}
+					}
+				}
+				else if(GetTeamClientCount(CS_TEAM_CT) < gc_iPreciseAutoBalanceT.IntValue && GetTeamClientCount(CS_TEAM_T) > GetTeamClientCount(CS_TEAM_CT) + 1)
+				{
+					if(GetClientTeam(client) == CS_TEAM_T)
+					{
+						if(IsPlayerBannedTeam(client, CS_TEAM_CT))
+						{
+							return; 
+						}
+						
+						if(IsPlayerImmunity(client))
+						{
+							return; 
+						}
+						
+						if(g_bSwapFilters)
+						{
+							SwapFilter(client, CS_TEAM_T);
+						}
+						else
+						{
+							ChangeTeam(client);
+							SetImmunity(client, true);
+						}
+					}
+				}
 			}
 		}
 	}
